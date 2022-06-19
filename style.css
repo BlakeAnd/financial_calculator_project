@@ -1,0 +1,63 @@
+h1{
+  text-align: center;
+}
+
+.chart{
+  margin: 10px 200px;
+}
+
+p{
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
+#submit{
+  margin-top: 20px;
+}
+
+form{
+  margin-left: 12px;
+  /* border: 2px solid black; */
+  display: flex;
+  flex-flow: row wrap ;
+  justify-content: space-evenly;
+  max-width: 600px;
+  margin: auto;
+}
+
+div {
+  /* display: flex; */
+  /* flex-direction: column; */
+  margin: 10px 20px;
+}
+
+input{
+  padding: 3px 3px;
+  border-radius: 4px;
+}
+
+body{
+  background-color: lightgoldenrodyellow;
+  font-family: sans-serif;
+}
+
+#submit{
+  background-color: cornflowerblue;
+  border: 1px solid cornflowerblue;
+  color: lightgoldenrodyellow;
+  padding: 8px 50px;
+}
+
+#submit:hover {
+  background-color: lightgray;
+}
+
+section{
+  /* background-color: antiquewhite; */
+  color: grey;
+  border: 3px solid grey;
+  width: 650px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+}

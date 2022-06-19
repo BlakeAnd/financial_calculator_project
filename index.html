@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>RMD</title>
+    <link rel="stylesheet" href="style.css">  
+    <!-- <link rel="icon" href="./favicon.ico" type="image/x-icon"> -->
+  </head>
+  <body>
+    <section>
+    <h1>Required Minimum Distribution Calculator</h1>
+    <form onsubmit="main(event)">
+      <div>
+      <p>Birth Date</p>
+      <input value="1960-01-01" type="date" id="birthdate" name="birthdate" required>
+
+      <p>Investment Value</p>
+      <span>$</span>
+      <input value="2000000" type="number" id="investmentvalue" name="investmentvalue" min="0" required>
+
+      <p>Rate Of Return</p>
+      <input value="6" type="number" id="ror" name="ror" min="0" required>
+      <span>%</span>
+
+      <p>Inflation Rate</p>
+      <input value="2" type="number" id="inflation" name="inflation" min="0" required>
+      <span>%</span>
+    </div>
+
+    <div>
+      <p>Married/Single</p>
+      <select name="single" id="single">
+        <option value="single">Single</option>
+        <option value="married">Married</option>
+      </select>
+
+      <p>Distribution From Portfolio</p>
+      <span>$</span>
+      <input value="50000" type="number" id="distribution-from-portfolio" name="distribution-from-portfolio" min="0" required>      
+      
+      <p>Distribution From Social Security</p>
+      <span>$</span>
+      <input value="20000" type="number" id="distribution-from-ss" name="distribution-from-ss" min="0" required>
+      
+      <br>
+      <input id="submit" type="submit">
+    </div>
+
+    </form>
+  </section>
+
+    <canvas class= "chart" id="myChart"></canvas>
+    <canvas class="chart" id="myChart2"></canvas>
+  <script src="node_modules\chart.js/dist/Chart.js"></script>
+	<script src="index.js"></script>
+  </body>
+</html>
