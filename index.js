@@ -25,6 +25,13 @@ let cumulative_after_tax_values = [];
 
 let portfolio_income = [];
 
+let average_annual_taxes = null;
+
+let cumulative_taxes_paid = null;
+
+let after_tax_value = null;
+
+let tax_change = null;
 
 
 let single_ss_brackets = [25000, 34000];
@@ -35,16 +42,19 @@ let life_expectancy_factor = [25.6, 24.7, 23.8, 22.9, 22, 21.2, 20.3, 19.5, 18.7
 
 let single_brackets = {
   lower_limits: [0, 9950, 40525, 86375, 164925, 209425, 523600],
-  tax_rate: [.05, .07, .17, .19, .27, .30, .32],
+  tax_rate: [.1, .12, .22, .24, .32, .35, .37],
   cumulative_tax: [0, 497.50, 2637.75, 10432.25, 25356.75, 37371.75, 131624.25]
 }
 let married_brackets = {
   lower_limits: [0, 19900, 81050, 172750, 329850, 418850, 628300],
-  tax_rate: [.05, .07, .17, .19, .27, .30, .32],
+  tax_rate: [.1, .12, .22, .24, .32, .35, .37],
   cumulative_tax: [0, 995, 5275.50, 20864.50, 50713.50, 74743.50, 137578.50]
 }
 
 let max_age = 97;
+
+let calc_single_brackets = null;
+let calc_married_brackets = null;
 
 
 
@@ -56,7 +66,7 @@ yyyy = parseInt(yyyy)
 yyyy = yyyy - (max_age - 1);
 yyyy = yyyy.toString();
 let min_birthdate = yyyy + '-' + mm + '-' + dd;
-console.log(min_birthdate);
+// console.log(min_birthdate);
 
 document.getElementById("birthdate").min = min_birthdate;
 
@@ -71,6 +81,8 @@ let myChart2 = new Chart(
 function main (e) {
   e.preventDefault();
 
+  document.body.style.overflowY = "scroll";
+
   // if(myChart != null){
   //   myChart.destroy();
   // }  
@@ -79,6 +91,7 @@ function main (e) {
   // }
 rate_of_return = document.getElementById("ror").value;
 inflation_rate = document.getElementById("inflation").value;
+tax_change = document.getElementById("tax_change").value;
 birthday = document.getElementById("birthdate").value;
 
 ages = [];
@@ -123,16 +136,55 @@ portfolio_income = [distribution_from_portfolio];
 
   rate_of_return = convertPercent(rate_of_return);
   inflation_rate = convertPercent(inflation_rate);
-  console.log(rate_of_return, inflation_rate)
+  tax_change = tax_change / 100;
+  // console.log("tax change", tax_change)
+  // console.log(rate_of_return, inflation_rate)
+
+  calc_single_brackets = JSON.parse(JSON.stringify(single_brackets));
+  calc_married_brackets = JSON.parse(JSON.stringify(married_brackets));
+
+  // calc_single_brackets.tax_rate = single_brackets.tax_rate;
+  // calc_married_brackets.tax_rate = married_brackets.tax_rate;
+  calc_single_brackets.tax_rate = adjustTaxBrackets(calc_single_brackets.tax_rate);
+  calc_married_brackets.tax_rate = adjustTaxBrackets(calc_married_brackets.tax_rate);
+  // console.log(single_brackets.tax_rate, married_brackets.tax_rate);
+  
+  // calc_single_brackets.lower_limits = single_brackets.lower_limits;
+  // calc_married_brackets.lower_limits = married_brackets.lower_limits;
+  // calc_single_brackets.cumulative_tax = single_brackets.cumulative_tax;
+  // calc_married_brackets.cumulative_tax = married_brackets.cumulative_tax;
+
+  calc_single_brackets.cumulative_tax = adjustCumulativeTaxValues(calc_single_brackets.cumulative_tax, calc_single_brackets.tax_rate, calc_single_brackets.lower_limits);
+  calc_married_brackets.cumulative_tax = adjustCumulativeTaxValues(calc_married_brackets.cumulative_tax, calc_married_brackets.tax_rate, calc_married_brackets.lower_limits);
+  console.log("calc and og", calc_single_brackets.tax_rate, single_brackets.tax_rate)
+  console.log("calc and og", calc_single_brackets.cumulative_tax, single_brackets.cumulative_tax)
 
   let age = calculateAge();
-  console.log(age);
+  // console.log(age);
   // checkInputs();
 
-  console.log(rate_of_return, inflation_rate, birthday, age, investment_value, distribution_from_portfolio, initial_soc_security, single);
+  // console.log(rate_of_return, inflation_rate, birthday, age, investment_value, distribution_from_portfolio, initial_soc_security, single);
 
     makeCalculations(age);
   
+}
+
+
+function adjustTaxBrackets (array) {
+  for(let i = 0; i < array.length; i++){
+    array[i] = array[i] + tax_change;
+  }
+  array = removeNegative(array);
+  return array;
+}
+
+function removeNegative (array) {
+  for(let i = 0; i < array.length; i++){
+    if(array[i] < 0){
+      array[i] = 0;
+    }
+  }
+  return array;
 }
 
 // function checkInputs () {
@@ -144,7 +196,7 @@ portfolio_income = [distribution_from_portfolio];
 function calculateAge () {
   birthday = new Date(birthday);
     // document.getElementById("birthdate").value);
-  console.log("bday", birthday);
+  // console.log("bday", birthday);
   
   let age = today.getFullYear() - birthday.getFullYear();
   var m = today.getMonth() - birthday.getMonth();
@@ -152,6 +204,13 @@ function calculateAge () {
       age--;
   }
   return age;
+}
+
+function adjustCumulativeTaxValues (array, tax_rates, low_lims) {
+  for(let i = 1; i < array.length; i++){
+    array[i] = ((low_lims[i] - low_lims[i-1]) * tax_rates[i-1]) + array[i-1]
+  }
+  return array;
 }
 
 function makeCalculations (age) {
@@ -162,7 +221,7 @@ function makeCalculations (age) {
   for(let i = 1; i < ages.length; i++){
     portfolio_income.push(portfolio_income[i-1] * inflation_rate)
   }
-  console.log(ages.length, portfolio_income);
+  // console.log(ages.length, portfolio_income);
     
 
     for(let i = 1; i <= max_age-age; i++){
@@ -210,13 +269,13 @@ function makeCalculations (age) {
     // console.log(ss_taxable_portions);
 
     if(single === true){
-      createTotalTaxPaid(single_brackets);
+      createTotalTaxPaid(calc_single_brackets);
     }
     else{
-      createTotalTaxPaid(married_brackets);
+      createTotalTaxPaid(calc_married_brackets);
     }
 
-    console.log(total_taxes_paid);
+    // console.log(total_taxes_paid);
 
     for(let i = 0; i <= max_age-age; i++){
       if(required_min_distributions[i] <= total_taxes_paid[i]){
@@ -255,8 +314,6 @@ function makeCalculations (age) {
       }
     }
 
-    
-
     function lookUpAndSum (bracket, value){
       let index = lookUp(bracket.lower_limits, value);
       let lowlimit_val = value - bracket.lower_limits[index];
@@ -272,8 +329,34 @@ function makeCalculations (age) {
           return i-1;
         }
       }
+      return array.length - 1;
     }
 
+    required_min_distributions = removeNegative(required_min_distributions);
+    cumulative_after_tax_values = removeNegative(cumulative_after_tax_values);
+    pretax_portfolio_values = removeNegative(pretax_portfolio_values);
+
+    function sumArray (array) {
+      let sum = 0;
+      for(let i = 0; i < array.length; i++){
+        sum += array[i];
+        // console.log(sum)
+      }
+      return sum;
+    }
+
+    console.log(total_taxes_paid);
+    average_annual_taxes = sumArray(total_taxes_paid) / total_taxes_paid.length;
+    cumulative_taxes_paid = sumArray(total_taxes_paid);
+    after_tax_value = sumArray(after_tax_investments);
+
+    document.getElementById("average-annual-taxes").textContent = "Average Annual Taxes: ";
+    document.getElementById("cumulative-taxes-paid").textContent = "Cumulative Taxes Paid: ";
+    document.getElementById("after-tax-value").textContent = "After Tax Value: ";
+
+    document.getElementById("average-annual-taxes").textContent += average_annual_taxes.toLocaleString("en-US");
+    document.getElementById("cumulative-taxes-paid").textContent += cumulative_taxes_paid.toLocaleString("en-US");
+    document.getElementById("after-tax-value").textContent += after_tax_value.toLocaleString("en-US");
 
     const labels = ages;
   

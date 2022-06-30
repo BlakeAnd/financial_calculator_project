@@ -27,6 +27,7 @@
       <p>Inflation Rate</p>
       <input value="2" type="number" id="inflation" name="inflation" min="0" required>
       <span>%</span>
+
     </div>
 
     <div>
@@ -43,6 +44,10 @@
       <p>Distribution From Social Security</p>
       <span>$</span>
       <input value="20000" type="number" id="distribution-from-ss" name="distribution-from-ss" min="0" required>
+
+      <p>What If Taxes Increase or Decrease</p>
+      <input value="-5" type="number" id="tax_change" name="tax_change" min="-99" required>
+      <span>%</span>
       
       <br>
       <input id="submit" type="submit">
@@ -50,6 +55,12 @@
 
     </form>
   </section>
+
+    <div class="results">
+      <p id="average-annual-taxes"></p>
+      <p id="cumulative-taxes-paid"></p>
+      <p id="after-tax-value"></p>
+    </div>
 
     <canvas class= "chart" id="myChart"></canvas>
     <canvas class="chart" id="myChart2"></canvas>

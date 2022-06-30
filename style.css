@@ -3,7 +3,7 @@ h1{
 }
 
 .chart{
-  margin: 10px 200px;
+  margin: 10px 50px;
 }
 
 p{
@@ -37,27 +37,35 @@ input{
 }
 
 body{
-  background-color: lightgoldenrodyellow;
+  background-color: #eeebdf;
   font-family: sans-serif;
+  overflow-y: hidden;
 }
 
 #submit{
-  background-color: cornflowerblue;
-  border: 1px solid cornflowerblue;
+  background-color: teal;
+  border: 1px solid teal;
   color: lightgoldenrodyellow;
   padding: 8px 50px;
+  margin-top: 40px;
 }
 
 #submit:hover {
-  background-color: lightgray;
+  background-color: turquoise;
 }
 
 section{
-  /* background-color: antiquewhite; */
+  offset: 50px;
+  background-color: white;
   color: grey;
   border: 3px solid grey;
   width: 650px;
   margin: auto;
   padding: 20px;
   border-radius: 10px;
+}
+
+.results{
+  font-size: 18px;
+  text-align: center;
 }
