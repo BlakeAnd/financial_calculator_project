@@ -14,18 +14,22 @@
     <form onsubmit="main(event)">
       <div>
       <p>Birth Date</p>
-      <input value="1960-01-01" type="date" id="birthdate" name="birthdate" required>
+      <input value="1960-01-02" type="date" id="birthdate" name="birthdate" required>
 
       <p>Investment Value</p>
       <span>$</span>
-      <input value="2000000" type="number" id="investmentvalue" name="investmentvalue" min="0" required>
+      <input value="1000000" type="number" step=".01" id="investmentvalue" name="investmentvalue" min="0" required>
 
       <p>Rate Of Return</p>
-      <input value="6" type="number" id="ror" name="ror" min="0" required>
+      <input value="5" type="number" step=".01" id="ror" name="ror" min="0" required>
       <span>%</span>
 
       <p>Inflation Rate</p>
-      <input value="2" type="number" id="inflation" name="inflation" min="0" required>
+      <input value="2.5" type="number" step=".01" id="inflation" name="inflation" min="0" required>
+      <span>%</span>
+
+      <p>What If Taxes Increase or Decrease</p>
+      <input value="0" type="number" id="tax_change" name="tax_change" min="-99" required>
       <span>%</span>
 
     </div>
@@ -33,21 +37,23 @@
     <div>
       <p>Married/Single</p>
       <select name="single" id="single">
-        <option value="single">Single</option>
         <option value="married">Married</option>
+        <option value="single">Single</option>
+        
       </select>
 
       <p>Distribution From Portfolio</p>
       <span>$</span>
-      <input value="50000" type="number" id="distribution-from-portfolio" name="distribution-from-portfolio" min="0" required>      
+      <input value="25000" type="number" step=".01"id="distribution-from-portfolio" name="distribution-from-portfolio" min="0" required>      
       
       <p>Distribution From Social Security</p>
       <span>$</span>
-      <input value="20000" type="number" id="distribution-from-ss" name="distribution-from-ss" min="0" required>
+      <input value="20000" type="number" step=".01" id="distribution-from-ss" name="distribution-from-ss" min="0" required>
 
-      <p>What If Taxes Increase or Decrease</p>
-      <input value="-5" type="number" id="tax_change" name="tax_change" min="-99" required>
-      <span>%</span>
+      <p>Extra Distribution</p>
+      <span>$</span>
+      <input value="20000" type="number" step=".01" id="extra-distribution" name="extra-distribution" min="0" required>
+
       
       <br>
       <input id="submit" type="submit">

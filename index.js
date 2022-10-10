@@ -33,6 +33,17 @@ let after_tax_value = null;
 
 let tax_change = null;
 
+let extra_distribution = null;
+
+let extra_distributions = [];
+
+let extra_taxable_income = [];
+
+let extra_distribution_taxes = [];
+
+let difference_for_extra_distribution_taxes = [];
+
+let extra_after_tax_portion = [];
 
 let single_ss_brackets = [25000, 34000];
 let married_ss_brackets = [32000, 44000];
@@ -51,7 +62,7 @@ let married_brackets = {
   cumulative_tax: [0, 995, 5275.50, 20864.50, 50713.50, 74743.50, 137578.50]
 }
 
-let max_age = 97;
+let max_age = 100;
 
 let calc_single_brackets = null;
 let calc_married_brackets = null;
@@ -108,6 +119,9 @@ total_distributions = [distribution_from_portfolio]
 initial_soc_security = document.getElementById("distribution-from-ss").value;
 initial_soc_security = parseFloat(initial_soc_security);
 social_securities = [initial_soc_security];
+
+extra_distribution = document.getElementById("extra-distribution").value;
+extra_distribution = parseFloat(extra_distribution);
 
 required_min_distributions = [0];
 
@@ -214,6 +228,8 @@ function adjustCumulativeTaxValues (array, tax_rates, low_lims) {
 }
 
 function makeCalculations (age) {
+  let max_index = max_age - age;
+
   for(let i = age; i <= max_age; i++){
     ages.push(i);
   }
@@ -224,29 +240,86 @@ function makeCalculations (age) {
   // console.log(ages.length, portfolio_income);
     
 
-    for(let i = 1; i <= max_age-age; i++){
+    for(let i = 1; i <= max_index; i++){
       distributions.push(distributions[i-1]*(inflation_rate));
       social_securities.push(social_securities[i-1]*(inflation_rate));
     }
 
-    for(let i = 1; i <= max_age-age; i++){
-      if(i <= 72 - age){
+    for(let i = 1; i <= max_index; i++){
+      if(i < 72 - age){
         // pretax_values.push(distributions[i-1]*(inflation_rate));
         required_min_distributions.push(0);
+        total_distributions.push(distributions[i] + required_min_distributions[i])
+
+        // total_distributions.push(distributions[i] + required_min_distributions[i])
+        pretax_portfolio_values.push((pretax_portfolio_values[i - 1] * rate_of_return) - total_distributions[i] - extra_distribution);
+      }
+      else if (i === 72 - age){
+        let life_expectancy_index = i - (72 - age);
+        // console.log(pretax_portfolio_values[i-1]*rate_of_return, life_expectancy_index,life_expectancy_factor[life_expectancy_index])
+        let val = (pretax_portfolio_values[i-1]*rate_of_return)/life_expectancy_factor[life_expectancy_index];
+        // console.log("val", val, portfolio_income[i])
+        if(val > portfolio_income[i]){
+          // console.log('eyyyyyyyyyyyyy')
+          required_min_distributions.push( val - portfolio_income[i] );
+          // console.log(required_min_distributions[i]);
+        }
+        else{
+          required_min_distributions.push(val);
+        }
+        total_distributions.push(distributions[i] + required_min_distributions[i])
+
+        pretax_portfolio_values.push((pretax_portfolio_values[i - 1] * rate_of_return) - total_distributions[i] - extra_distribution); 
       }
       else{
-        // console.log(i, (i-(70-age)), life_expectancy_factor[i-(70-age)]);
-        required_min_distributions.push((pretax_portfolio_values[i-1]*rate_of_return)/life_expectancy_factor[i-(70-age)]);
+
+        // console.log(i, (i-(73-age)), life_expectancy_factor[i-(73-age)]);
+        let life_expectancy_index = i - (73 - age);
+        // console.log("xpectnc", life_expectancy_factor[life_expectancy_index])
+        let val = (pretax_portfolio_values[i-1]*rate_of_return)/life_expectancy_factor[life_expectancy_index];
+        // console.log("val", val, portfolio_income[i])
+        if(val > portfolio_income[i]){
+          required_min_distributions.push( val - portfolio_income[i]);
+          //  console.log("valdiff", val, required_min_distributions[i])
+        }
+        else{
+          required_min_distributions.push(val);
+        }
+        total_distributions.push(distributions[i] + required_min_distributions[i])
+        pretax_portfolio_values.push((pretax_portfolio_values[i - 1] * rate_of_return) - total_distributions[i]);
+        
+      
+
+        // required_min_distributions.push((pretax_portfolio_values[i-1]*rate_of_return)/life_expectancy_factor[i-(70-age)]);
       }
 
-      total_distributions.push(distributions[i] + required_min_distributions[i])
+      // total_distributions.push(distributions[i] + required_min_distributions[i])
 
-      pretax_portfolio_values.push((pretax_portfolio_values[i - 1]*rate_of_return) - total_distributions[i]);
     } 
+    // console.log("72", pretax_portfolio_values[72 - age], required_min_distributions[72-age]);
 
-    for(let i = 0; i <= max_age-age; i++){
+    console.log("73", pretax_portfolio_values[73 - age], required_min_distributions[73 - age], total_distributions[73 - age]);
+    // console.log("73", portfolio_income[73 - age]);
+    // formular (A14*(1+Sheet1!$G$3)/X4)-R15
+      // console.log("rmd 73", required_min_distributions[73-age]);
+
+    for(let i = 0; i <= max_index; i++){
       taxable_income.push(total_distributions[i] + social_securities[i]);
     }
+
+    for(let i = 0; i <= max_index; i++){
+      let new_extra_distribution = null;
+      if(i < 72 - age){
+        new_extra_distribution = extra_distribution + distributions[i];
+      }
+      else{
+        new_extra_distribution = 0;
+      }
+      extra_distributions.push(new_extra_distribution);
+    }
+    console.log("ex_dis", extra_distributions);
+    console.log("dist", distributions)
+
 
     let ss_brackets = [];
     if(single === true){
@@ -255,7 +328,7 @@ function makeCalculations (age) {
     else{
       ss_brackets = married_ss_brackets;
     }
-    for(let i = 0; i <=97-age; i++){
+    for(let i = 0; i <=max_index; i++){
       if(taxable_income[i] < ss_brackets[0]){
         ss_taxable_portions.push(0);
       }
@@ -266,33 +339,80 @@ function makeCalculations (age) {
         ss_taxable_portions.push(social_securities[i]*0.85)
       }
     }
+
+    for(let i = 0; i <= max_index; i++){
+      let eti_push_val = null;
+      if(i < 72 - age){
+        eti_push_val = extra_distributions[i] + ss_taxable_portions[i];
+      }
+      else{
+        eti_push_val = 0;
+      }
+      console.log()
+      extra_taxable_income.push(eti_push_val);
+    }
     // console.log(ss_taxable_portions);
 
     if(single === true){
       createTotalTaxPaid(calc_single_brackets);
+      createExtraDistributionTaxes(calc_single_brackets);  
     }
     else{
       createTotalTaxPaid(calc_married_brackets);
+      createExtraDistributionTaxes(calc_married_brackets);  
     }
+
+    for(let i = 0; i <= max_index; i++){
+      if(i < 72 - age){
+        difference_for_extra_distribution_taxes.push(Math.round(extra_distribution_taxes[i] - total_taxes_paid[i]));
+      }
+      else{
+        difference_for_extra_distribution_taxes.push(0);
+      }
+    }
+
+    for(let i = 0; i <= max_index; i++){
+      if(i < 72 - age){
+        extra_after_tax_portion.push(extra_distribution - difference_for_extra_distribution_taxes[i]);
+      }
+      else{
+        extra_after_tax_portion.push(0);
+      }
+    }
+
+    console.log("ttp", total_taxes_paid, "edt", extra_distribution_taxes);
+    console.log(difference_for_extra_distribution_taxes);
+    console.log("eatp", extra_after_tax_portion);
+
+    
 
     // console.log(total_taxes_paid);
 
     for(let i = 0; i <= max_age-age; i++){
-      if(required_min_distributions[i] <= total_taxes_paid[i]){
+      // console.log(required_min_distributions[0], total_taxes_paid[0])
+      if((required_min_distributions[i] - total_taxes_paid[i]) < 0){
         after_tax_investments.push(0);
       }
       else{
-        after_tax_investments.push((required_min_distributions[i] - total_taxes_paid[i]) * rate_of_return);
+        after_tax_investments.push(((required_min_distributions[i] - total_taxes_paid[i]) * rate_of_return));
       }
+      console.log(i, after_tax_investments[i], extra_after_tax_portion[i]);
+      after_tax_investments[i] += extra_after_tax_portion[i];
       // console.log(i, after_tax_investments[i])
     }
+    // console.log("pi", portfolio_income)
+    // console.log("td", total_distributions)
+    // console.log("pre por", pretax_portfolio_values)
+    // console.log("rmd", required_min_distributions);
+    console.log("ati", after_tax_investments);
+    // console.log("socsec", social_securities)
 
-    cumulative_after_tax_values.push(after_tax_investments[0])
+    console.log("addup", after_tax_investments[0], extra_after_tax_portion[0])
+    cumulative_after_tax_values.push(after_tax_investments[0] + extra_after_tax_portion[0])
     for(let i = 1; i <= max_age - age; i++){
-      cumulative_after_tax_values.push(cumulative_after_tax_values[i-1] + after_tax_investments[i])
+      cumulative_after_tax_values.push((cumulative_after_tax_values[i-1] * rate_of_return) + after_tax_investments[i] + extra_after_tax_portion[i])
     }
-    // console.log(cumulative_after_tax_values);
-
+    console.log("catv", cumulative_after_tax_values);
     
 
     // console.log(required_min_distributions.length)
@@ -307,20 +427,34 @@ function makeCalculations (age) {
     // console.log(life_expectancy_factor.length)
 
     function  createTotalTaxPaid (bracket) {
-      for(let i = 0; i <= max_age-age; i++){
+      for(let i = 0; i <= max_index; i++){
         let lookup_value = total_distributions[i] + ss_taxable_portions[i];
-        let total_tax = lookUpAndSum(bracket, lookup_value);
+        let total_tax = lookUpAndSumForTotalTaxes(bracket, lookup_value);
         total_taxes_paid.push(total_tax);
       }
     }
 
-    function lookUpAndSum (bracket, value){
+    function createExtraDistributionTaxes(bracket){
+      for(let i = 0; i <= max_index; i++){
+        let lookup_value = extra_taxable_income[i];
+        let extra_distribution_tax = lookUpAndSumForTotalTaxes(bracket, lookup_value);
+        extra_distribution_taxes.push(extra_distribution_tax);
+      }
+    }
+
+
+
+    function lookUpAndSumForTotalTaxes (bracket, value){
       let index = lookUp(bracket.lower_limits, value);
       let lowlimit_val = value - bracket.lower_limits[index];
       let tax_rate_val = bracket.tax_rate[index];
       let cumulativetax_val = bracket.cumulative_tax[index];
       let return_val = cumulativetax_val + lowlimit_val * tax_rate_val;
       return return_val; 
+    }
+
+    function lookUpAndSumForExtraDistribution() {
+
     }
 
     function lookUp (array, value) {
@@ -336,6 +470,8 @@ function makeCalculations (age) {
     cumulative_after_tax_values = removeNegative(cumulative_after_tax_values);
     pretax_portfolio_values = removeNegative(pretax_portfolio_values);
 
+
+
     function sumArray (array) {
       let sum = 0;
       for(let i = 0; i < array.length; i++){
@@ -345,7 +481,7 @@ function makeCalculations (age) {
       return sum;
     }
 
-    console.log(total_taxes_paid);
+    // console.log(total_taxes_paid);
     average_annual_taxes = sumArray(total_taxes_paid) / total_taxes_paid.length;
     cumulative_taxes_paid = sumArray(total_taxes_paid);
     after_tax_value = sumArray(after_tax_investments);
