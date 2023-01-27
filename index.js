@@ -469,7 +469,7 @@ function makeCalculations (age) {
     required_min_distributions = removeNegative(required_min_distributions);
     cumulative_after_tax_values = removeNegative(cumulative_after_tax_values);
     pretax_portfolio_values = removeNegative(pretax_portfolio_values);
-
+    extra_distributions = removeNegative(extra_distributions);
 
 
     function sumArray (array) {
@@ -518,6 +518,12 @@ function makeCalculations (age) {
         borderColor: 'blue',
         data: required_min_distributions,
       },
+      {
+        label: 'Extra Distribution',
+        backgroundColor: 'green',
+        borderColor: 'green',
+        data: extra_distributions,
+      }
 
     
     ]
